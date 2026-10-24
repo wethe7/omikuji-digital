@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>おみくじ — цифровое омикудзи</title>
+<meta name="description" content="Цифровая версия японского бумажного омикудзи: история обычая и предсказание судьбы одним нажатием. Digital omikuji: the story of the custom and a fortune at one click.">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+.jp{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif}
+#app[data-lang="en"] .ru-only{display:none!important}
+#app[data-lang="ru"] .en-only{display:none!important}
+
+/* ---------- гаммы: розовая (по умолчанию), зелёная, голубая, момиджи; каждая со своей тёмной версией ---------- */
+#app{
+  --oj-bg:#FAF7F5; --oj-paper:#FFFDFB; --oj-nav:#FFFFFF;
+  --oj-soft-bg:#F6E6E8; --oj-petal:#EFC5CA;
+  --oj-accent:#C4606C; --oj-accent-deep:#AC4E5B; --oj-accent-soft:#EFC3C9;
+  --oj-branch:#B3A79B;
+  --oj-ink:#3A3234; --oj-muted:#9A8C8C; --oj-line:#ECDFDA;
+  --oj-box-front:#F2C9CD; --oj-box-left:#E1ABB2; --oj-box-right:#D69CA5;
+  --oj-shadow-card:0 22px 44px rgba(86,54,58,.13);
+  --oj-shadow-btn:0 10px 22px rgba(196,96,108,.30);
+  --oj-ground:rgba(86,54,58,.10);
+}
+#app[data-palette="green"]{
+  --oj-bg:#F4F7F1; --oj-paper:#FCFEFA; --oj-nav:#FBFDF8;
+  --oj-soft-bg:#E6EEE1; --oj-petal:#C9D8C0;
+  --oj-accent:#7E9678; --oj-accent-deep:#698063; --oj-accent-soft:#C9D8C0;
+  --oj-branch:#9AA58E;
+  --oj-ink:#31382E; --oj-muted:#8B9583; --oj-line:#DDE6D5;
+  --oj-box-front:#DCE6D4; --oj-box-left:#C7D6BD; --oj-box-right:#B6C8AB;
+  --oj-leaf:#8FA78E; --oj-leaf-deep:#6E8A6C;
+  --oj-shadow-card:0 22px 44px rgba(62,76,58,.13);
+  --oj-shadow-btn:0 10px 22px rgba(126,150,120,.30);
+  --oj-ground:rgba(62,76,58,.10);
+}
+#app[data-palette="blue"]{
+  --oj-bg:#F3F7FB; --oj-paper:#FCFDFE; --oj-nav:#FAFCFE;
+  --oj-soft-bg:#E2EAF3; --oj-petal:#C3D3E4;
+  --oj-accent:#6C8CB4; --oj-accent-deep:#58789F; --oj-accent-soft:#C3D3E4;
+  --oj-branch:#9BA7B4;
+  --oj-ink:#2F353D; --oj-muted:#8B939F; --oj-line:#DCE5EE;
+  --oj-box-front:#D6E1EE; --oj-box-left:#C2D2E2; --oj-box-right:#B1C3D7;
+  --oj-shadow-card:0 22px 44px rgba(50,64,84,.13);
+  --oj-shadow-btn:0 10px 22px rgba(108,140,180,.30);
+  --oj-ground:rgba(50,64,84,.10);
+}
+#app[data-palette="red"]{
+  --oj-bg:#F9F1EB; --oj-paper:#FFFBF7; --oj-nav:#FFF8F2;
+  --oj-soft-bg:#F6E1D6; --oj-petal:#D8815F;
+  --oj-accent:#C05B45; --oj-accent-deep:#A64834; --oj-accent-soft:#EFC5B4;
+  --oj-branch:#A98F7C;
+  --oj-ink:#3D2F28; --oj-muted:#9C8477; --oj-line:#F0DCCF;
+  --oj-box-front:#F3CBB9; --oj-box-left:#E3A88F; --oj-box-right:#D3967C;
+  --oj-shadow-card:0 22px 44px rgba(96,54,38,.13);
+  --oj-shadow-btn:0 10px 22px rgba(192,91,69,.30);
+  --oj-ground:rgba(96,54,38,.10);
+}
+#app.dark{
+  --oj-bg:#1C1E26; --oj-paper:#252832; --oj-nav:#22242E;
+  --oj-soft-bg:#35282F; --oj-petal:#8A5E6A;
+  --oj-accent:#D4808B; --oj-accent-deep:#C26874; --oj-accent-soft:#543C44;
+  --oj-branch:#565460;
+  --oj-ink:#ECE6E1; --oj-muted:#9A8F96; --oj-line:#3A3D49;
+  --oj-box-front:#A97984; --oj-box-left:#94656F; --oj-box-right:#875A66;
+  --oj-shadow-card:0 24px 48px rgba(0,0,0,.45);
+  --oj-shadow-btn:0 10px 24px rgba(0,0,0,.35);
+  --oj-ground:rgba(0,0,0,.4);
+}
+#app.dark[data-palette="green"]{
+  --oj-soft-bg:#2A332A; --oj-petal:#6F8F6B;
+  --oj-accent:#94B58E; --oj-accent-deep:#7FA37A; --oj-accent-soft:#3A4A38;
+  --oj-branch:#575F53;
+  --oj-box-front:#7A9371; --oj-box-left:#69815F; --oj-box-right:#5D7355;
+  --oj-leaf:#7E9678; --oj-leaf-deep:#5C7355;
+}
+#app.dark[data-palette="blue"]{
+  --oj-soft-bg:#2A303C; --oj-petal:#86A3C4;
+  --oj-accent:#8FAFD6; --oj-accent-deep:#7C9DC4; --oj-accent-soft:#364456;
+  --oj-branch:#575E68;
+  --oj-box-front:#7E93B0; --oj-box-left:#6C82A0; --oj-box-right:#5F7390;
+}
+#app.dark[data-palette="red"]{
+  --oj-soft-bg:#3A2A24; --oj-petal:#B4674A;
+  --oj-accent:#DE8266; --oj-accent-deep:#C96E52; --oj-accent-soft:#54362B;
+  --oj-branch:#5C5148;
+  --oj-box-front:#B07D64; --oj-box-left:#9A694F; --oj-box-right:#8A5B44;
+}
+
+#app{
+  position:relative; min-height:100vh; overflow:clip;
+  display:flex; flex-direction:column;
+  background:var(--oj-bg); color:var(--oj-ink);
+  transition:background-color .35s ease, color .35s ease;
+}
+
+/* ---------- декор: угловые ветки (сакура в розовой/голубой, момиджи в красной) и парк бонсай (зелёная) ---------- */
+.deco{position:absolute;inset:0;pointer-events:none;z-index:0;transition:opacity .35s ease}
+#app.dark .deco{opacity:.6}
+.deco .br{position:absolute;width:min(60vw,360px);height:auto}
+.br-l{top:-10px;left:-16px}
+.br-r{top:-10px;right:-16px;transform:scaleX(-1)}
+#app[data-palette="green"] .deco-corner{display:none}
+#app[data-palette="red"] .deco-sakura{display:none}
+#app:not([data-palette="red"]) .deco-momiji{display:none}
+.park{display:none;width:100%;height:auto;flex:none;position:relative;z-index:1}
+#app[data-palette="green"] .park{display:block}
+
+/* ---------- падающие лепестки и листья ---------- */
+.petals{position:absolute;inset:0;z-index:0;pointer-events:none}
+.fall{position:absolute;top:-6%;animation:fall linear infinite}
+.fall svg{display:block;width:100%;height:auto;transform-origin:50% 50%;animation:sway ease-in-out infinite alternate}
+@keyframes fall{to{top:106%}}
+@keyframes sway{from{transform:translateX(-12px) rotate(-42deg)}to{transform:translateX(12px) rotate(38deg)}}
+.lf-momiji{display:none}
+#app[data-palette="red"] .lf-sakura{display:none}
+#app[data-palette="red"] .lf-momiji{display:block}
+
+/* ---------- шапка ---------- */
+.nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;
+  height:58px;padding:0 clamp(16px,4vw,44px);
+  background:var(--oj-nav);border-bottom:1px solid var(--oj-line);
+  transition:background-color .35s ease,border-color .35s ease}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--oj-accent)}
+.brand svg{width:21px;height:21px;flex:none}
+.brand .jp{font-size:17px;font-weight:600;letter-spacing:.08em}
+.menu{display:flex;gap:26px;margin-left:40px}
+.menu a{font-size:13.5px;color:var(--oj-muted);text-decoration:none;transition:color .2s ease}
+.menu a:hover{color:var(--oj-ink)}
+.menu a.active{color:var(--oj-accent);font-weight:500}
+.lang{display:flex;margin-left:auto;border:1px solid var(--oj-line);border-radius:999px;padding:2px;background:var(--oj-bg)}
+.lang button{border:none;background:none;font:inherit;font-size:10.5px;font-weight:600;letter-spacing:.06em;
+  color:var(--oj-muted);padding:4px 10px;border-radius:999px;cursor:pointer;
+  transition:background-color .2s ease,color .2s ease}
+.lang button:hover{color:var(--oj-ink)}
+.lang button[aria-pressed="true"]{background:var(--oj-accent);color:#fff}
+.palette{display:flex;align-items:center;gap:8px;margin-left:14px}
+.dot{width:17px;height:17px;border-radius:50%;border:none;padding:0;cursor:pointer;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.10);
+  transition:transform .15s ease,box-shadow .15s ease}
+.dot:hover{transform:scale(1.15)}
+.dot[aria-pressed="true"]{box-shadow:0 0 0 2px var(--oj-bg),0 0 0 3.5px var(--oj-muted)}
+.dot-pink{background:#E7B3B8}
+.dot-green{background:#8FA78E}
+.dot-blue{background:#9FB6D4}
+.dot-red{background:#D8815F}
+.icon-btn{margin-left:8px;width:34px;height:34px;border:none;border-radius:50%;
+  background:transparent;color:var(--oj-muted);display:grid;place-items:center;cursor:pointer;
+  transition:background-color .2s ease,color .2s ease}
+.icon-btn:hover{background:var(--oj-soft-bg);color:var(--oj-ink)}
+.icon-btn svg{width:17px;height:17px}
+#app:not(.dark) .ic-sun{display:none}
+#app.dark .ic-moon{display:none}
+
+/* ---------- сцены ---------- */
+main{position:relative;z-index:1;flex:1}
+.stage{display:grid;place-items:center;min-height:calc(100vh - 150px);padding:40px 20px 56px}
+.view{grid-area:1/1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center}
+.view.show{animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- коробка ---------- */
+.box-wrap{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.box-wrap svg{display:block;width:min(216px,58vw);height:auto}
+.box-wrap.shake{animation:shake .68s ease-in-out}
+@keyframes shake{
+  0%,100%{transform:translate(0,0) rotate(0)}
+  15%{transform:translate(-2px,-7px) rotate(-2deg)}
+  35%{transform:translate(2px,0) rotate(2deg)}
+  55%{transform:translate(-2px,-4px) rotate(-1.4deg)}
+  75%{transform:translate(1px,0) rotate(1deg)}
+  90%{transform:translate(0,-2px) rotate(0)}
+}
+.box-front{fill:var(--oj-box-front)} .box-left{fill:var(--oj-box-left)} .box-right{fill:var(--oj-box-right)}
+.box-rim{fill:var(--oj-accent)} .box-hole{fill:var(--oj-accent-deep)}
+.box-label{fill:var(--oj-paper);stroke:var(--oj-line)}
+.box-ground{fill:var(--oj-ground)}
+.box-char{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:21px;font-weight:600;fill:var(--oj-ink);text-anchor:middle}
+
+/* ---------- кнопка ---------- */
+.btn-main{margin-top:34px;display:inline-flex;flex-direction:column;align-items:center;gap:3px;
+  border:none;border-radius:999px;padding:14px 34px 12px;cursor:pointer;
+  background:var(--oj-accent);color:#fff;box-shadow:var(--oj-shadow-btn);
+  transition:background-color .2s ease,transform .18s ease,box-shadow .2s ease}
+.btn-main:hover{background:var(--oj-accent-deep);transform:translateY(-1px)}
+.btn-main:active{transform:translateY(1px)}
+.btn-main:disabled{opacity:.7;cursor:default}
+.btn-main .jp{font-size:16.5px;font-weight:600;letter-spacing:.05em}
+.btn-main .ru{font-size:11px;font-weight:500;opacity:.85;letter-spacing:.02em}
+
+.orn{display:flex;align-items:center;gap:12px;margin-top:30px;color:var(--oj-accent)}
+.orn::before,.orn::after{content:"";width:52px;height:1px;background:var(--oj-line)}
+.orn svg{width:14px;height:14px;display:block}
+.hint{margin-top:13px;font-size:12.5px;line-height:1.6;color:var(--oj-muted);max-width:280px}
+
+/* ---------- лист предсказания ---------- */
+.paper{position:relative;width:min(432px,94vw);margin-top:6px;background:var(--oj-paper);
+  border:1px solid var(--oj-accent-soft);box-shadow:var(--oj-shadow-card);padding:30px 32px 26px;
+  transition:background-color .35s ease,border-color .35s ease}
+.paper::before{content:"";position:absolute;inset:7px;border:1px solid var(--oj-line);pointer-events:none}
+.top-bloom{width:20px;height:20px;display:block;margin:0 auto 4px}
+.paper-num{font-size:12px;letter-spacing:.3em;color:var(--oj-muted)}
+.paper-num .jp{letter-spacing:.3em}
+.fate{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:clamp(52px,14vw,62px);font-weight:600;line-height:1.2;margin:8px 0 2px}
+#app.dark .fate{filter:brightness(1.28) saturate(.85)}
+.fate-ru{font-size:14.5px;font-weight:500;letter-spacing:.02em}
+.fate-en{font-size:11px;letter-spacing:.24em;color:var(--oj-muted);margin-top:6px}
+.rule{border:none;border-top:1px solid var(--oj-line);width:120px;margin:18px auto 16px}
+.poem{font-size:13.5px;line-height:1.7;max-width:320px;margin:0 auto}
+.cats{list-style:none;text-align:left;margin-top:10px}
+.cats li{display:flex;align-items:center;gap:13px;padding:7px 0}
+.cat-ic{flex:none;width:34px;height:34px;border-radius:50%;background:var(--oj-soft-bg);color:var(--oj-accent);display:grid;place-items:center}
+.cat-ic svg{width:16px;height:16px}
+.cat-name{font-size:13px;font-weight:600}
+.cat-name .jp{color:var(--oj-accent);font-size:13.5px;font-weight:600;margin-right:7px}
+.cat-v{font-size:12px;line-height:1.5;color:var(--oj-muted);margin-top:2px}
+.advice-label{font-size:11px;letter-spacing:.22em;color:var(--oj-muted)}
+.advice{font-size:13px;line-height:1.65;max-width:300px;margin:8px auto 0}
+.btn-again{margin-top:22px;padding:12px 30px 10px}
+.btn-again .jp{font-size:14.5px}
+.link-back{margin-top:14px;border:none;background:none;cursor:pointer;font:inherit;font-size:12.5px;color:var(--oj-muted);padding:4px 6px;transition:color .2s ease}
+.link-back:hover{color:var(--oj-accent)}
+
+/* ---------- страница «Главная»: рассказ об омикудзи ---------- */
+.view-home{width:min(700px,100%);margin:0 auto;padding:24px 6px 26px}
+.hero{text-align:center;padding:6px 0 34px}
+.hero-art{width:min(430px,88vw);height:auto;display:block;margin:0 auto}
+.hero h1{font-size:clamp(34px,8vw,44px);font-weight:600;letter-spacing:.08em;margin:4px 0 10px}
+.hero-sub{font-size:14px;line-height:1.75;max-width:470px;margin:0 auto;color:var(--oj-ink);opacity:.85}
+.hero .btn-main{margin-top:24px}
+.story{width:100%;margin:0 auto 26px;padding:28px 34px 28px;text-align:left;
+  background:var(--oj-paper);border:1px solid var(--oj-line);border-radius:10px;
+  box-shadow:var(--oj-shadow-card);
+  transition:background-color .35s ease,border-color .35s ease}
+.kicker{font-size:12px;letter-spacing:.26em;color:var(--oj-accent);font-weight:600}
+.story h2{font-size:20px;font-weight:600;margin:6px 0 2px}
+.story h2 .ru-only,.story h2 .en-only{display:inline}
+.story-art{width:min(300px,82%);display:block;margin:14px auto 8px;height:auto}
+.story p{font-size:13.5px;line-height:1.8;margin:10px 0}
+.story p .jp,.story .note .jp{font-size:1.05em}
+.note{font-size:12.5px;color:var(--oj-muted);border-left:2px solid var(--oj-accent-soft);padding:2px 0 2px 12px;margin:14px 0 2px}
+.steps{list-style:none;margin:12px 0 0}
+.steps li{display:flex;gap:13px;align-items:flex-start;padding:7px 0}
+.step-n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--oj-soft-bg);color:var(--oj-accent);display:grid;place-items:center;font-size:13px;font-weight:600}
+.steps p{margin:3px 0 0}
+.levels{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:16px 0 8px}
+.levels .lv{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--lv);color:var(--lv);
+  border-radius:10px;padding:7px 13px;font-size:15px;font-weight:600}
+.lv small{font-size:11px;font-weight:500;opacity:.85}
+.home-cta{text-align:center;padding:8px 0 26px}
+.home-cta .jp-line{font-size:12px;letter-spacing:.3em;color:var(--oj-muted);margin-bottom:4px}
+
+/* ---------- диалог «О проекте» ---------- */
+dialog{border:1px solid var(--oj-accent-soft);border-radius:10px;background:var(--oj-paper);color:var(--oj-ink);
+  padding:30px 34px 28px;text-align:center;box-shadow:var(--oj-shadow-card);width:min(380px,92vw);margin:auto}
+dialog::backdrop{background:rgba(24,20,24,.45)}
+.dlg-close{position:absolute;top:10px;right:12px;border:none;background:none;font-size:20px;line-height:1;
+  color:var(--oj-muted);cursor:pointer;padding:4px 6px}
+.dlg-close:hover{color:var(--oj-ink)}
+.dlg-bloom{width:20px;height:20px;display:block;margin:0 auto 6px}
+dialog h3{font-size:15px;font-weight:600;margin:2px 0 8px}
+dialog p{font-size:13.5px;line-height:1.75;max-width:280px;margin:0 auto}
+
+footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-size:11.5px;letter-spacing:.04em;color:var(--oj-muted)}
+
+:is(a,button,.box-wrap):focus-visible{outline:2px solid var(--oj-accent);outline-offset:3px;border-radius:6px}
+.btn-main:focus-visible,.box-wrap:focus-visible{border-radius:999px}
+
+@media (max-width:620px){
+  .menu{display:none}
+  .story{padding:24px 20px}
+  .lang button{padding:4px 7px}
+}
+@media (prefers-reduced-motion:reduce){
+  .view.show,.box-wrap.shake,.fall,.fall svg,.fly,.fly .arc,.fly .spin,
+  .view.show .paper,.view.show .fate,.view.show .fate-ru,.view.show .fate-en,
+  .view.show .poem,.view.show .cats li,.view.show .advice-label,.view.show .advice,
+  .view.show .btn-again,.view.show .link-back,.box-wrap.shake .bstick,.hero-box,
+  dialog[open]{animation:none!important}
+  .fly{display:none}
+}
+</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+JP:wght@500;600;700&display=swap" rel="stylesheet">
+
+<div id="app" data-palette="pink" data-lang="ru">
+
+  <div class="petals" id="petalLayer" aria-hidden="true"></div>
+
+  <div class="deco" aria-hidden="true">
+    <svg class="br br-l deco-sakura" viewBox="0 0 340 260">
+      <g fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--oj-branch)">
+        <path d="M-12 26 C 60 34, 130 68, 190 138"/>
+        <path d="M70 42 C 92 58, 104 80, 106 108"/>
+        <path d="M124 76 C 136 90, 142 108, 142 130"/>
+        <path d="M28 32 C 42 40, 52 52, 54 70"/>
+        <path d="M166 108 C 178 118, 184 132, 184 150"/>
+      </g>
+      <use href="#bloom" transform="translate(34,36) scale(.8)"/>
+      <use href="#bloom" transform="translate(54,70) scale(.85)"/>
+      <use href="#bloom" transform="translate(106,108) scale(1.05)"/>
+      <use href="#bloom" transform="translate(142,130) scale(.8)"/>
+      <use href="#bloom" transform="translate(178,132) scale(1)"/>
+      <use href="#bloom" transform="translate(98,64) scale(.7)"/>
+      <use href="#bloom" transform="translate(150,96) scale(.65)"/>
+      <use href="#petalP" transform="translate(216,168) scale(.85) rotate(35)"/>
+      <use href="#petalP" transform="translate(128,196) scale(.7) rotate(-28)"/>
+      <use href="#petalP" transform="translate(232,120) scale(.65) rotate(20)"/>
+      <use href="#petalP" transform="translate(84,178) scale(.6) rotate(-40)"/>
+      <use href="#petalP" transform="translate(250,180) scale(.55) rotate(10)"/>
+      <use href="#petalP" transform="translate(176,212) scale(.5) rotate(30)"/>
+    </svg>
+    <svg class="br br-r deco-sakura" viewBox="0 0 340 260">
+      <g fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--oj-branch)">
+        <path d="M-12 26 C 60 34, 130 68, 190 138"/>
+        <path d="M70 42 C 92 58, 104 80, 106 108"/>
+        <path d="M124 76 C 136 90, 142 108, 142 130"/>
+        <path d="M28 32 C 42 40, 52 52, 54 70"/>
+        <path d="M166 108 C 178 118, 184 132, 184 150"/>
+      </g>
+      <use href="#bloom" transform="translate(34,36) scale(.8)"/>
+      <use href="#bloom" transform="translate(54,70) scale(.85)"/>
+      <use href="#bloom" transform="translate(106,108) scale(1.05)"/>
+      <use href="#bloom" transform="translate(142,130) scale(.8)"/>
+      <use href="#bloom" transform="translate(178,132) scale(1)"/>
+      <use href="#bloom" transform="translate(98,64) scale(.7)"/>
+      <use href="#bloom" transform="translate(150,96) scale(.65)"/>
+      <use href="#petalP" transform="translate(216,168) scale(.85) rotate(35)"/>
+      <use href="#petalP" transform="translate(128,196) scale(.7) rotate(-28)"/>
+      <use href="#petalP" transform="translate(232,120) scale(.65) rotate(20)"/>
+      <use href="#petalP" transform="translate(84,178) scale(.6) rotate(-40)"/>
+      <use href="#petalP" transform="translate(250,180) scale(.55) rotate(10)"/>
+      <use href="#petalP" transform="translate(176,212) scale(.5) rotate(30)"/>
+    </svg>
+    <svg class="br br-l deco-momiji" viewBox="0 0 340 260">
+      <g fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--oj-branch)">
+        <path d="M-12 26 C 60 34, 130 68, 190 138"/>
+        <path d="M70 42 C 92 58, 104 80, 106 108"/>
+        <path d="M124 76 C 136 90, 142 108, 142 130"/>
+        <path d="M28 32 C 42 40, 52 52, 54 70"/>
+        <path d="M166 108 C 178 118, 184 132, 184 150"/>
+      </g>
+      <use href="#momijiP" transform="translate(34,36) scale(1)"/>
+      <use href="#momijiP" transform="translate(54,70) scale(1.05) rotate(20)"/>
+      <use href="#momijiP" transform="translate(106,108) scale(1.3) rotate(-15)"/>
+      <use href="#momijiP" transform="translate(142,130) scale(1) rotate(30)"/>
+      <use href="#momijiP" transform="translate(178,132) scale(1.25) rotate(10)"/>
+      <use href="#momijiP" transform="translate(98,64) scale(.9) rotate(-30)"/>
+      <use href="#momijiP" transform="translate(150,96) scale(.8)"/>
+      <use href="#momijiP" transform="translate(216,168) scale(.9) rotate(35)" opacity=".9"/>
+      <use href="#momijiP" transform="translate(128,196) scale(.75) rotate(-28)" opacity=".85"/>
+      <use href="#momijiP" transform="translate(232,120) scale(.7) rotate(20)" opacity=".8"/>
+      <use href="#momijiP" transform="translate(84,178) scale(.65) rotate(-40)" opacity=".8"/>
+      <use href="#momijiP" transform="translate(250,180) scale(.6) rotate(10)" opacity=".75"/>
+      <use href="#momijiP" transform="translate(176,212) scale(.55) rotate(30)" opacity=".75"/>
+    </svg>
+    <svg class="br br-r deco-momiji" viewBox="0 0 340 260">
+      <g fill="none" stroke-width="3" stroke-linecap="round" style="stroke:var(--oj-branch)">
+        <path d="M-12 26 C 60 34, 130 68, 190 138"/>
+        <path d="M70 42 C 92 58, 104 80, 106 108"/>
+        <path d="M124 76 C 136 90, 142 108, 142 130"/>
+        <path d="M28 32 C 42 40, 52 52, 54 70"/>
+        <path d="M166 108 C 178 118, 184 132, 184 150"/>
+      </g>
+      <use href="#momijiP" transform="translate(34,36) scale(1)"/>
+      <use href="#momijiP" transform="translate(54,70) scale(1.05) rotate(20)"/>
+      <use href="#momijiP" transform="translate(106,108) scale(1.3) rotate(-15)"/>
+      <use href="#momijiP" transform="translate(142,130) scale(1) rotate(30)"/>
+      <use href="#momijiP" transform="translate(178,132) scale(1.25) rotate(10)"/>
+      <use href="#momijiP" transform="translate(98,64) scale(.9) rotate(-30)"/>
+      <use href="#momijiP" transform="translate(150,96) scale(.8)"/>
+      <use href="#momijiP" transform="translate(216,168) scale(.9) rotate(35)" opacity=".9"/>
+      <use href="#momijiP" transform="translate(128,196) scale(.75) rotate(-28)" opacity=".85"/>
+      <use href="#momijiP" transform="translate(232,120) scale(.7) rotate(20)" opacity=".8"/>
+      <use href="#momijiP" transform="translate(84,178) scale(.65) rotate(-40)" opacity=".8"/>
+      <use href="#momijiP" transform="translate(250,180) scale(.6) rotate(10)" opacity=".75"/>
+      <use href="#momijiP" transform="translate(176,212) scale(.55) rotate(30)" opacity=".75"/>
+    </svg>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="#" data-nav="home">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M1 6.4C4.7 4.7 8.3 3.8 12 3.8s7.3.9 11 2.6l-.8 2.5c-3.1-1.5-6.6-2.3-10.2-2.3S4.9 7.4 1.8 8.9L1 6.4z"/><rect x="4.4" y="9.2" width="15.2" height="1.8" rx=".6"/><rect x="11.1" y="11" width="1.8" height="2.7"/><rect x="5.9" y="9.2" width="1.8" height="11.9" rx=".5"/><rect x="16.3" y="9.2" width="1.8" height="11.9" rx=".5"/></svg>
+      <span class="jp">おみくじ</span>
+    </a>
+    <nav class="menu" aria-label="Разделы / Sections">
+      <a href="#" data-nav="home" class="active"><span class="ru-only">Главная</span><span class="en-only">Home</span></a>
+      <a href="#" data-nav="game"><span class="ru-only">Омикудзи</span><span class="en-only">Omikuji</span></a>
+      <a href="#" id="aboutOpen"><span class="ru-only">О проекте</span><span class="en-only">About</span></a>
+    </nav>
+    <div class="lang" role="group" aria-label="Язык / Language">
+      <button type="button" data-langset="ru" aria-pressed="true">RU</button>
+      <button type="button" data-langset="en" aria-pressed="false">EN</button>
+    </div>
+    <div class="palette" role="group" aria-label="Цветовая гамма / Color palette">
+      <button class="dot dot-pink" data-set="pink" aria-pressed="true" type="button"></button>
+      <button class="dot dot-green" data-set="green" aria-pressed="false" type="button"></button>
+      <button class="dot dot-blue" data-set="blue" aria-pressed="false" type="button"></button>
+      <button class="dot dot-red" data-set="red" aria-pressed="false" type="button"></button>
+    </div>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Переключить светлую и тёмную тему / Toggle dark mode">
+      <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+      <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.8v2M12 19.2v2M2.8 12h2M19.2 12h2M5.1 5.1l1.4 1.4M17.5 17.5l1.4 1.4M18.9 5.1l-1.4 1.4M6.5 17.5l-1.4 1.4"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <section class="view-home" id="viewHome">
+      <header class="hero">
+        <svg class="hero-art" viewBox="0 0 360 210" aria-hidden="true">
+          <line x1="26" y1="186" x2="334" y2="186" style="stroke:var(--oj-line)" stroke-width="2" stroke-linecap="round"/>
+          <g transform="translate(52,112) scale(3.5)" style="fill:var(--oj-accent)">
+            <path d="M1 6.4C4.7 4.7 8.3 3.8 12 3.8s7.3.9 11 2.6l-.8 2.5c-3.1-1.5-6.6-2.3-10.2-2.3S4.9 7.4 1.8 8.9L1 6.4z"/>
+            <rect x="4.4" y="9.2" width="15.2" height="1.8" rx=".6"/>
+            <rect x="11.1" y="11" width="1.8" height="2.7"/>
+            <rect x="5.9" y="9.2" width="1.8" height="11.9" rx=".5"/>
+            <rect x="16.3" y="9.2" width="1.8" height="11.9" rx=".5"/>
+          </g>
+          <g transform="translate(201,68.4) scale(.55)"><g class="hero-box">
+            <ellipse class="box-ground" cx="110" cy="216" rx="76" ry="10"/>
+            <polygon class="box-left" points="44,52 78,70 78,214 44,196"/>
+            <polygon class="box-front" points="78,70 142,70 142,214 78,214"/>
+            <polygon class="box-right" points="142,70 176,52 176,196 142,214"/>
+            <polygon class="box-rim" points="44,52 78,34 142,34 176,52 142,70 78,70"/>
+            <polygon class="box-hole" points="58,52 84,38 136,38 162,52 136,66 84,66"/>
+            <rect class="box-label" x="92" y="92" width="36" height="116" rx="5"/>
+            <text class="box-char" x="110" y="116">お</text>
+            <text class="box-char" x="110" y="142">み</text>
+            <text class="box-char" x="110" y="168">く</text>
+            <text class="box-char" x="110" y="194">じ</text>
+          </g></g>
+          <g transform="translate(178,42) scale(.9)" opacity=".7"><use class="lf-sakura" href="#petalP"/><use class="lf-momiji" href="#momijiP"/></g>
+          <g transform="translate(322,74) scale(.7) rotate(30)" opacity=".6"><use class="lf-sakura" href="#petalP"/><use class="lf-momiji" href="#momijiP"/></g>
+          <g transform="translate(60,44) scale(.6) rotate(-24)" opacity=".55"><use class="lf-sakura" href="#petalP"/><use class="lf-momiji" href="#momijiP"/></g>
+          <use href="#bloom" transform="translate(300,120) scale(.8)" opacity=".8"/>
+        </svg>
+        <h1 class="jp">おみくじ</h1>
+        <p class="hero-sub">
+          <span class="ru-only">Омикудзи (御籤) — бумажная полоска с предсказанием судьбы, которую тянут в синтоистских святилищах и буддийских храмах Японии. Случай здесь считают не случайностью, а голосом божества-хранителя.</span>
+          <span class="en-only">Omikuji (御籤) is a small strip of paper with a fortune on it, drawn at Shinto shrines and Buddhist temples across Japan. Chance here is not chance at all — it is the voice of the guardian deity.</span>
+        </p>
+        <button class="btn-main" type="button" data-nav="game">
+          <span class="jp">引いてみる</span>
+          <span class="ru ru-only">Попробовать предсказание</span>
+          <span class="ru en-only">Try a fortune</span>
+        </button>
+      </header>
+
+      <article class="story">
+        <p class="kicker"><span class="jp">由緒</span><span class="ru-only"> · история</span><span class="en-only"> · history</span></p>
+        <h2><span class="ru-only">Откуда взялся жребий</span><span class="en-only">Where the lots came from</span></h2>
+        <svg class="story-art" viewBox="0 0 240 150" aria-hidden="true">
+          <ellipse cx="120" cy="126" rx="80" ry="9" style="fill:var(--oj-ground)"/>
+          <path d="M36 56 C 42 100, 80 118, 120 118 C 160 118, 198 100, 204 56" fill="none" style="stroke:var(--oj-accent)" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="120" cy="56" rx="88" ry="21" fill="none" style="stroke:var(--oj-accent)" stroke-width="3"/>
+          <ellipse cx="120" cy="58" rx="74" ry="14" style="fill:var(--oj-soft-bg)"/>
+          <g transform="rotate(-14 92 50)">
+            <rect x="86" y="40" width="13" height="21" rx="2" style="fill:var(--oj-paper);stroke:var(--oj-line)"/>
+            <path d="M89.5 46h6M89.5 50h6M89.5 54h4" style="stroke:var(--oj-muted)" stroke-width="1.2" stroke-linecap="round"/>
+          </g>
+          <g transform="rotate(11 140 52)">
+            <rect x="134" y="42" width="13" height="21" rx="2" style="fill:var(--oj-paper);stroke:var(--oj-line)"/>
+            <path d="M137.5 48h6M137.5 52h6M137.5 56h4" style="stroke:var(--oj-muted)" stroke-width="1.2" stroke-linecap="round"/>
+          </g>
+          <g transform="rotate(-3 114 60)">
+            <rect x="108" y="50" width="13" height="21" rx="2" style="fill:var(--oj-paper);stroke:var(--oj-line)"/>
+            <path d="M111.5 56h6M111.5 60h6M111.5 64h4" style="stroke:var(--oj-muted)" stroke-width="1.2" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <p class="ru-only">Слово <span class="jp">御籤</span> складывается из почтительной приставки <span class="jp">御</span> (о) и слова <span class="jp">籤</span> (кудзи) — «жребий». Получается «почтенный жребий»: судьбу здесь не гадают, а честно вытягивают наугад.</p>
+        <p class="en-only">The word <span class="jp">御籤</span> combines the honorific prefix <span class="jp">御</span> (o) with <span class="jp">籤</span> (kuji) — “a lot”. So omikuji literally means “an honorable lot”: your fate is not guessed here, it is honestly drawn at random.</p>
+        <p class="ru-only">Обычай решать жребием важное старше храмовых бумажек. При императорском дворе спорные вопросы — от наследования титула до назначения на должность — решал ритуал <span class="jp">水くじ</span>, «водяной жребий»: полоски с именами опускали в воду, и первая всплывшая считалась волей богов.</p>
+        <p class="en-only">Drawing lots for important matters is older than the temple papers themselves. At the imperial court, disputed questions — from inheriting a title to appointing an official — were settled by the ritual of <span class="jp">水くじ</span>, “water lots”: strips of paper with names were dipped into the water, and the first one to surface was taken for the will of the gods.</p>
+        <p class="ru-only">В эпоху Хэйан (794–1185) жеребьёвка перебралась в храмы: теперь у ками и будд спрашивали не только о делах двора, но и о простой жизни — урожае, дороге, болезни. А к эпохе Эдо (1603–1868) омикудзи стали привычной частью новогоднего визита хацумодэ.</p>
+        <p class="en-only">In the Heian period (794–1185) the practice moved into the temples: people began asking the kami and buddhas not only about matters of court but about everyday life — the harvest, a journey, an illness. By the Edo period (1603–1868) omikuji had become a familiar part of hatsumōde, the first shrine visit of the new year.</p>
+        <p class="ru-only">Шестигранная коробка с бамбуковыми палочками — примета нового времени: предсказания стали печатать на бумаге и выдавать по номеру вытянутой палочки. Сегодня коробка часто стоит на самообслуживании, а предсказания тянут даже в телефонах — как на этой странице.</p>
+        <p class="en-only">The hexagonal box with bamboo sticks is a mark of modern times: fortunes came to be printed on paper and handed out in exchange for the number on the drawn stick. Today the box often works on self-service — and people even draw omikuji on their phones, like on this page.</p>
+      </article>
+
+      <article class="story">
+        <p class="kicker"><span class="jp">作法</span><span class="ru-only"> · порядок</span><span class="en-only"> · the ritual</span></p>
+        <h2><span class="ru-only">Как его тянут</span><span class="en-only">How it is drawn</span></h2>
+        <svg class="story-art" viewBox="0 0 240 190" aria-hidden="true">
+          <ellipse cx="120" cy="152" rx="60" ry="8" style="fill:var(--oj-ground)"/>
+          <g transform="translate(52,16) scale(.62)">
+            <polygon class="box-left" points="44,52 78,70 78,214 44,196"/>
+            <polygon class="box-front" points="78,70 142,70 142,214 78,214"/>
+            <polygon class="box-right" points="142,70 176,52 176,196 142,214"/>
+            <polygon class="box-rim" points="44,52 78,34 142,34 176,52 142,70 78,70"/>
+            <polygon class="box-hole" points="58,52 84,38 136,38 162,52 136,66 84,66"/>
+            <rect class="box-label" x="92" y="92" width="36" height="116" rx="5"/>
+            <text class="box-char" x="110" y="116">お</text>
+            <text class="box-char" x="110" y="142">み</text>
+            <text class="box-char" x="110" y="168">く</text>
+            <text class="box-char" x="110" y="194">じ</text>
+          </g>
+          <g transform="rotate(-24 120 48)">
+            <rect x="115.5" y="0" width="9" height="50" rx="4.5" fill="#D9C795"/>
+            <rect x="115.5" y="0" width="9" height="7" rx="3.5" fill="#C6B17C"/>
+            <text x="120" y="30" text-anchor="middle" font-size="9.5" font-weight="600" fill="#8A7A55">42</text>
+          </g>
+          <path d="M62 28 q-11 15 0 30" fill="none" style="stroke:var(--oj-muted)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M178 28 q11 15 0 30" fill="none" style="stroke:var(--oj-muted)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <ol class="steps">
+          <li><span class="step-n jp">一</span><div>
+            <p class="ru-only">Бросают монетку — чаще всего пять иен: «го-эн» звучит так же, как «добрая связь» (ご縁).</p>
+            <p class="en-only">Drop in a coin — most often five yen: “go-en” sounds just like “a good bond” (ご縁).</p>
+          </div></li>
+          <li><span class="step-n jp">二</span><div>
+            <p class="ru-only">Трясут шестигранную коробку, пока через отверстие не выпадет бамбуковая палочка.</p>
+            <p class="en-only">Shake the hexagonal box until a bamboo stick falls out through the hole.</p>
+          </div></li>
+          <li><span class="step-n jp">三</span><div>
+            <p class="ru-only">На палочке — номер. Его показывают служителю или находят ящик с тем же числом.</p>
+            <p class="en-only">The stick carries a number. Show it to the priest — or find the drawer marked with the same number.</p>
+          </div></li>
+          <li><span class="step-n jp">四</span><div>
+            <p class="ru-only">В обмен получают полоску с предсказанием: уровень удачи, стихотворение и советы по делам.</p>
+            <p class="en-only">In exchange you receive a strip of paper: your luck level, a short poem and advice on everyday matters.</p>
+          </div></li>
+          <li><span class="step-n jp">五</span><div>
+            <p class="ru-only">Полоску читают и решают её судьбу: счастливое забирают, неудачное оставляют в храме.</p>
+            <p class="en-only">Read it and decide its fate: a lucky one goes home with you, an unlucky one stays at the shrine.</p>
+          </div></li>
+        </ol>
+        <p class="note">
+          <span class="ru-only">Неудачную полоску привязывают к ветке сосны или к специальной стойке у храма. Дерево выбрано не случайно: «сосна» по-японски звучит как <span class="jp">松</span> (мацу) — «ждать» (<span class="jp">待つ</span>). Беда останется подождать здесь, а человек пойдёт дальше налегке.</span>
+          <span class="en-only">An unlucky strip is tied to a pine branch or to a special rack at the temple. The tree is no accident: in Japanese, “pine” (<span class="jp">松</span>, matsu) sounds the same as “to wait” (<span class="jp">待つ</span>). The bad luck stays behind to wait — and you walk on unburdened.</span>
+        </p>
+      </article>
+
+      <article class="story">
+        <p class="kicker"><span class="jp">運勢</span><span class="ru-only"> · удача</span><span class="en-only"> · fortune</span></p>
+        <h2><span class="ru-only">Шесть уровней удачи</span><span class="en-only">Six levels of luck</span></h2>
+        <p class="ru-only">На самом верху полоски стоит уровень удачи — от великой до плохой. Порядок в разных храмах слегка различается (иногда 末吉 ставят ниже 小吉), но суть одна: предсказание — не приговор, а повод подумать о годе впереди.</p>
+        <p class="en-only">At the very top of the strip stands your luck level — from great blessing to misfortune. Different temples order them slightly differently (sometimes 末吉 is ranked below 小吉), but the point is the same: a fortune is not a verdict — it is a reason to think about the year ahead.</p>
+        <ul class="levels">
+          <li class="lv" style="--lv:#C4606C"><span class="jp">大吉</span><small><span class="ru-only">великая удача</span><span class="en-only">great blessing</span></small></li>
+          <li class="lv" style="--lv:#7E9678"><span class="jp">吉</span><small><span class="ru-only">хорошая удача</span><span class="en-only">good luck</span></small></li>
+          <li class="lv" style="--lv:#C29545"><span class="jp">中吉</span><small><span class="ru-only">средняя удача</span><span class="en-only">medium luck</span></small></li>
+          <li class="lv" style="--lv:#9C86B4"><span class="jp">小吉</span><small><span class="ru-only">небольшая удача</span><span class="en-only">small luck</span></small></li>
+          <li class="lv" style="--lv:#8B8494"><span class="jp">末吉</span><small><span class="ru-only">не очень удача</span><span class="en-only">not much luck</span></small></li>
+          <li class="lv" style="--lv:#5C5566"><span class="jp">凶</span><small><span class="ru-only">плохая удача</span><span class="en-only">misfortune</span></small></li>
+        </ul>
+        <svg class="story-art" viewBox="0 0 240 150" aria-hidden="true">
+          <path d="M12 34 C 72 38, 132 58, 188 96" fill="none" style="stroke:var(--oj-branch)" stroke-width="3" stroke-linecap="round"/>
+          <g style="stroke:var(--oj-branch)" stroke-width="1.8" stroke-linecap="round">
+            <path d="M64 38 l16 -8 M66 42 l17 2"/>
+            <path d="M108 52 l16 -8 M110 56 l17 2"/>
+            <path d="M148 68 l16 -8 M150 72 l17 2"/>
+          </g>
+          <path d="M150 78 C 152 82, 151 85, 150 88" fill="none" style="stroke:var(--oj-muted)" stroke-width="1.6"/>
+          <circle cx="150" cy="92" r="4.5" fill="none" style="stroke:var(--oj-accent)" stroke-width="2"/>
+          <g transform="rotate(7 150 118)">
+            <rect x="137" y="94" width="26" height="46" rx="3" style="fill:var(--oj-paper);stroke:var(--oj-line)"/>
+            <text x="150" y="124" text-anchor="middle" font-size="17" class="jp" font-weight="600" style="fill:var(--oj-muted)">凶</text>
+          </g>
+        </svg>
+        <p class="ru-only">Ниже печатают короткое стихотворение и мини-советы: <span class="jp">恋愛</span> — любовь, <span class="jp">仕事</span> — работа, <span class="jp">学業</span> — учёба, <span class="jp">健康</span> — здоровье, <span class="jp">金運</span> — финансы. Счастливую полоску забирают домой — носят в кошельке или вкладывают в книгу; неудачную лучше привязать у храма, чтобы беда осталась там, а не ехала с вами.</p>
+        <p class="en-only">Below come a short poem and mini-advice: <span class="jp">恋愛</span> — love, <span class="jp">仕事</span> — work, <span class="jp">学業</span> — studies, <span class="jp">健康</span> — health, <span class="jp">金運</span> — money. A lucky strip goes home — kept in a wallet or a book; an unlucky one is best tied up at the shrine, so the trouble stays there instead of travelling with you.</p>
+      </article>
+
+      <div class="home-cta">
+        <p class="jp-line jp">運試し</p>
+        <button class="btn-main" type="button" data-nav="game">
+          <span class="jp">おみくじを引く</span>
+          <span class="ru ru-only">Вытянуть своё предсказание</span>
+          <span class="ru en-only">Draw your fortune</span>
+        </button>
+      </div>
+    </section>
+
+    <div class="stage" id="stage" hidden>
+      <section class="view" id="viewBox">
+        <div class="box-wrap" id="boxWrap" role="button" tabindex="0" aria-label="Достать предсказание из коробки / Draw a fortune from the box">
+          <svg viewBox="0 0 220 246" aria-hidden="true">
+            <ellipse class="box-ground" cx="110" cy="216" rx="76" ry="10"/>
+            <polygon class="box-left"  points="44,52 78,70 78,214 44,196"/>
+            <polygon class="box-front" points="78,70 142,70 142,214 78,214"/>
+            <polygon class="box-right" points="142,70 176,52 176,196 142,214"/>
+            <polygon class="box-rim" points="44,52 78,34 142,34 176,52 142,70 78,70"/>
+            <polygon class="box-hole" points="58,52 84,38 136,38 162,52 136,66 84,66"/>
+            <rect class="box-label" x="92" y="92" width="36" height="116" rx="5"/>
+            <text class="box-char" x="110" y="116">お</text>
+            <text class="box-char" x="110" y="142">み</text>
+            <text class="box-char" x="110" y="168">く</text>
+            <text class="box-char" x="110" y="194">じ</text>
+            <g class="bstick" aria-hidden="true">
+              <rect x="105.5" y="8" width="9" height="46" rx="4.5" fill="#D9C795"/>
+              <rect x="105.5" y="8" width="9" height="7" rx="3.5" fill="#C6B17C"/>
+            </g>
+          </svg>
+        </div>
+        <button class="btn-main" id="drawBtn" type="button">
+          <span class="jp">おみくじを引く</span>
+          <span class="ru ru-only">Получить предсказание</span>
+          <span class="ru en-only">Get your fortune</span>
+        </button>
+        <div class="orn" aria-hidden="true"><svg viewBox="-8 -8 16 16"><use href="#bloom"/></svg></div>
+        <p class="hint"><span class="ru-only">Потяните за верёвочку, чтобы получить предсказание</span><span class="en-only">Give the string a little pull to receive your fortune</span></p>
+      </section>
+
+      <section class="view" id="viewPaper" hidden>
+        <div class="paper" role="status" aria-live="polite">
+          <svg class="top-bloom" viewBox="-8 -8 16 16" aria-hidden="true"><use href="#bloom"/></svg>
+          <p class="paper-num"><span class="jp">第</span> <span id="fNum">—</span> <span class="jp">番</span></p>
+          <h2 class="fate" id="fate">大吉</h2>
+          <p class="fate-ru" id="fT">Великая удача</p>
+          <p class="fate-en" id="fSub">DAIKICHI · GREAT BLESSING</p>
+          <hr class="rule">
+          <p class="poem" id="fPoem"></p>
+          <ul class="cats" id="fCats"></ul>
+          <hr class="rule">
+          <p class="advice-label"><span class="jp">今日の一言</span><span class="ru-only"> · совет дня</span><span class="en-only"> · today’s advice</span></p>
+          <p class="advice" id="fAdvice"></p>
+          <button class="btn-main btn-again" id="againBtn" type="button">
+            <span class="jp">もう一度</span>
+            <span class="ru ru-only">Получить ещё одно</span>
+            <span class="ru en-only">Draw another one</span>
+          </button>
+          <br>
+          <button class="link-back" id="backBtn" type="button">
+            <span class="ru-only">← вернуться к коробке</span>
+            <span class="en-only">← back to the box</span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <span class="jp">おみくじ</span>
+    <span class="ru-only"> · цифровая версия бумажного предсказания</span>
+    <span class="en-only"> · a digital take on the paper fortune</span>
+  </footer>
+
+  <svg class="park" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+    <path d="M0 214 C 150 208, 300 212, 450 210 C 650 207, 850 212, 1000 210 C 1080 209, 1150 211, 1200 210 L1200 240 L0 240 Z" style="fill:var(--oj-soft-bg)"/>
+    <path d="M0 214 C 150 208, 300 212, 450 210 C 650 207, 850 212, 1000 210 C 1080 209, 1150 211, 1200 210" fill="none" style="stroke:var(--oj-line)" stroke-width="2"/>
+    <path d="M170 212 C 168 186, 154 176, 158 152 C 161 134, 176 128, 172 106" fill="none" stroke="#7A6A5A" stroke-width="10" stroke-linecap="round"/>
+    <path d="M162 158 C 146 152, 134 142, 128 128" fill="none" stroke="#7A6A5A" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M166 132 C 180 126, 190 116, 194 102" fill="none" stroke="#7A6A5A" stroke-width="4" stroke-linecap="round"/>
+    <path d="M170 110 C 178 100, 180 90, 178 80" fill="none" stroke="#7A6A5A" stroke-width="3.5" stroke-linecap="round"/>
+    <g style="fill:var(--oj-leaf-deep)">
+      <circle cx="124" cy="124" r="20"/><circle cx="140" cy="112" r="16"/>
+      <circle cx="198" cy="98" r="18"/><circle cx="184" cy="88" r="14"/>
+      <circle cx="172" cy="72" r="18"/><circle cx="186" cy="66" r="12"/>
+    </g>
+    <g style="fill:var(--oj-leaf)">
+      <circle cx="130" cy="116" r="14"/><circle cx="144" cy="120" r="11"/>
+      <circle cx="192" cy="92" r="12"/><circle cx="202" cy="102" r="10"/>
+      <circle cx="166" cy="64" r="12"/><circle cx="178" cy="72" r="10"/><circle cx="154" cy="70" r="9"/>
+    </g>
+    <ellipse cx="331" cy="215" rx="36" ry="5" style="fill:var(--oj-ground)"/>
+    <path d="M300 212 C 302 196, 316 186, 334 188 C 352 190, 362 200, 362 212 Z" fill="#ADB7A6"/>
+    <path d="M362 212 C 364 204, 372 200, 380 202 C 388 204, 392 208, 392 212 Z" fill="#9CA898"/>
+    <g fill="none" style="stroke:var(--oj-leaf-deep)" stroke-width="1.8" stroke-linecap="round">
+      <path d="M424 210 c-2 -8 -6 -10 -8 -14 M428 210 c0 -9 2 -12 6 -16 M432 210 c2 -7 6 -9 10 -11"/>
+      <path d="M660 209 c-2 -8 -6 -10 -8 -14 M664 209 c0 -9 2 -12 6 -16 M668 209 c2 -7 6 -9 10 -11"/>
+      <path d="M942 211 c-2 -8 -6 -10 -8 -14 M946 211 c0 -9 2 -12 6 -16 M950 211 c2 -7 6 -9 10 -11"/>
+    </g>
+    <path d="M520 210 C 526 188, 546 178, 552 154 C 557 136, 550 122, 556 106" fill="none" stroke="#7A6A5A" stroke-width="9" stroke-linecap="round"/>
+    <path d="M548 162 C 566 158, 580 148, 588 134" fill="none" stroke="#7A6A5A" stroke-width="4" stroke-linecap="round"/>
+    <path d="M552 136 C 538 128, 530 118, 526 106" fill="none" stroke="#7A6A5A" stroke-width="3.5" stroke-linecap="round"/>
+    <g style="fill:var(--oj-leaf-deep)">
+      <circle cx="592" cy="130" r="17"/><circle cx="578" cy="120" r="13"/>
+      <circle cx="522" cy="102" r="15"/><circle cx="558" cy="96" r="14"/>
+    </g>
+    <g style="fill:var(--oj-leaf)">
+      <circle cx="586" cy="124" r="12"/><circle cx="598" cy="134" r="10"/>
+      <circle cx="528" cy="96" r="10"/><circle cx="540" cy="104" r="9"/>
+      <circle cx="560" cy="90" r="11"/>
+    </g>
+    <ellipse cx="800" cy="216" rx="48" ry="6" style="fill:var(--oj-ground)"/>
+    <path d="M760 212 C 762 194, 780 182, 800 184 C 822 186, 836 198, 838 212 Z" fill="#ADB7A6"/>
+    <path d="M800 186 C 792 170, 778 164, 762 166 C 744 168, 734 180, 726 194" fill="none" stroke="#7A6A5A" stroke-width="8" stroke-linecap="round"/>
+    <g style="fill:var(--oj-leaf-deep)">
+      <circle cx="806" cy="168" r="16"/><circle cx="792" cy="160" r="13"/>
+      <circle cx="722" cy="196" r="13"/>
+    </g>
+    <g style="fill:var(--oj-leaf)">
+      <circle cx="800" cy="162" r="12"/><circle cx="812" cy="170" r="10"/>
+      <circle cx="728" cy="192" r="10"/>
+    </g>
+    <path d="M1020 210 C 1018 196, 1010 190, 1012 176" fill="none" stroke="#7A6A5A" stroke-width="9" stroke-linecap="round"/>
+    <g style="fill:var(--oj-leaf-deep)">
+      <circle cx="1020" cy="150" r="34"/><circle cx="994" cy="162" r="20"/><circle cx="1046" cy="160" r="20"/>
+    </g>
+    <g style="fill:var(--oj-leaf)">
+      <circle cx="1012" cy="144" r="18"/><circle cx="1032" cy="150" r="16"/>
+      <circle cx="1000" cy="154" r="12"/><circle cx="1040" cy="142" r="11"/>
+    </g>
+  </svg>
+
+  <dialog id="aboutDlg" aria-labelledby="aboutTitle">
+    <button class="dlg-close" id="aboutClose" type="button" aria-label="Закрыть / Close">×</button>
+    <svg class="dlg-bloom" viewBox="-8 -8 16 16" aria-hidden="true"><use href="#bloom"/></svg>
+    <h3 id="aboutTitle">
+      <span class="ru-only">О проекте</span>
+      <span class="en-only">About</span>
+    </h3>
+    <p>
+      <span class="ru-only">Это любительский проект с предсказаниями от фаната японской культуры.</span>
+      <span class="en-only">This is an amateur fortune-telling project made by a fan of Japanese culture.</span>
+    </p>
+  </dialog>
+</div>
+
+<svg style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <g id="bloom">
+      <g style="fill:var(--oj-petal)">
+        <circle cx="0" cy="-4.4" r="3"/><circle cx="4.2" cy="-1.4" r="3"/><circle cx="2.6" cy="3.6" r="3"/>
+        <circle cx="-2.6" cy="3.6" r="3"/><circle cx="-4.2" cy="-1.4" r="3"/>
+      </g>
+      <circle r="1.5" style="fill:var(--oj-accent)"/>
+    </g>
+    <g id="petalP">
+      <path style="fill:var(--oj-petal)" d="M0 -7 C4 -5.5, 6.2 -1, 5.2 3.4 C4.4 6.8, 1.4 8.6, -1.8 7.4 C-5.4 6, -7 1.4, -5.2 -2.6 C-4 -5.2, -2.2 -6.6, 0 -7 Z"/>
+    </g>
+    <g id="momijiP" style="fill:var(--oj-petal)">
+      <circle r="2.2"/>
+      <path d="M0 0 C -1.7 -2.4, -1.7 -5.4, 0 -8 C 1.7 -5.4, 1.7 -2.4, 0 0 Z"/>
+      <path transform="rotate(72)" d="M0 0 C -1.7 -2.4, -1.7 -5.4, 0 -8 C 1.7 -5.4, 1.7 -2.4, 0 0 Z"/>
+      <path transform="rotate(144)" d="M0 0 C -1.7 -2.4, -1.7 -5.4, 0 -8 C 1.7 -5.4, 1.7 -2.4, 0 0 Z"/>
+      <path transform="rotate(216)" d="M0 0 C -1.7 -2.4, -1.7 -5.4, 0 -8 C 1.7 -5.4, 1.7 -2.4, 0 0 Z"/>
+      <path transform="rotate(288)" d="M0 0 C -1.7 -2.4, -1.7 -5.4, 0 -8 C 1.7 -5.4, 1.7 -2.4, 0 0 Z"/>
+    </g>
+  </defs>
+</svg>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(s){ return document.querySelector(s); };
+  var app = document.getElementById('app');
+  var viewHome = document.getElementById('viewHome');
+  var stage = document.getElementById('stage');
+  var viewBox = document.getElementById('viewBox'), viewPaper = document.getElementById('viewPaper');
+  var boxWrap = $('#boxWrap'), drawBtn = $('#drawBtn');
+  var themeBtn = $('#themeBtn'), againBtn = $('#againBtn'), backBtn = $('#backBtn');
+  var busy = false, lastKanji = null, lastNum = null, lastTip = null, curFortune = null;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var CATS = [
+    {jp:'願望', t:{ru:'Желание', en:'Wish'}},
+    {jp:'恋愛', t:{ru:'Любовь', en:'Love'}},
+    {jp:'仕事', t:{ru:'Работа', en:'Work'}},
+    {jp:'学業', t:{ru:'Учёба', en:'Studies'}},
+    {jp:'健康', t:{ru:'Здоровье', en:'Health'}},
+    {jp:'金運', t:{ru:'Финансы', en:'Money'}}
+  ];
+
+  var ICONS = [
+    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.6l1.9 5.5 5.5 1.9-5.5 1.9L12 18.4l-1.9-5.5L4.6 11l5.5-1.9L12 3.6z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19.5S4.6 15.1 3.5 10.4C2.7 7.1 5.1 4.6 7.9 4.6c1.7 0 3.2 1 4.1 2.6.9-1.6 2.4-2.6 4.1-2.6 2.8 0 5.2 2.5 4.4 5.8C19.4 15.1 12 19.5 12 19.5z"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M9.5 8V6.8A1.8 1.8 0 0 1 11.3 5h1.4a1.8 1.8 0 0 1 1.8 1.8V8M4 12.5h16"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.4C10 5 7.3 4.4 4.5 4.4v13.2c2.8 0 5.5.6 7.5 2 2-1.4 4.7-2 7.5-2V4.4c-2.8 0-5.5.6-7.5 2z"/><path d="M12 6.4v13.2"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7.6"/><path d="M12 8.6v6.8M8.6 12h6.8"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7.6"/><path d="M9.2 8.3l2.8 3.5 2.8-3.5M12 11.8v4.2M9.6 12.7h4.8M9.6 14.7h4.8"/></svg>'
+  ];
+
+  var FORTUNES = [
+    {kanji:'大吉', romaji:'DAIKICHI', t:{ru:'Великая удача', en:'Great Blessing'}, w:10, color:'var(--oj-accent)',
+     poems:{
+       ru:['Сегодня перед вами открываются новые пути. Не бойтесь сделать первый шаг — именно он приведёт к желаемому.',
+           'Всё складывается в вашу пользу. Смелое решение, принятое сегодня, отблагодарит вас очень скоро.',
+           'Удача выбрала вас сама. Делитесь ею — и она удвоится к вечеру.'],
+       en:['Today new paths open before you. Do not be afraid to take the first step — it is the one that leads to what you wish for.',
+           'Everything is falling in your favour. A bold decision made today will repay you very soon.',
+           'Fortune has chosen you herself. Share it — and it will double by evening.']},
+     cats:{
+       ru:['Загаданное сбудется — и скорее, чем вы ждёте','Взаимность ближе, чем кажется','Признание и удачный поворот дел','Учение идёт легко, память щедра','Бодрость и силы на весь год','Прибыток: щедрость вернётся вдвойне'],
+       en:['What you wish for will come true — sooner than you expect','Mutual feelings are closer than they seem','Recognition and a lucky turn of affairs','Learning comes easily, memory is generous','Vigour and strength for the whole year','Profit: your generosity will return twofold']}},
+    {kanji:'吉', romaji:'KICHI', t:{ru:'Хорошая удача', en:'Blessing'}, w:20, color:'#7E9678',
+     poems:{
+       ru:['Удача идёт рядом ровным шагом. Спокойная уверенность сегодня ценнее спешки.',
+           'Хороший день для тихих побед: то, что делается без суеты, выходит лучше всего.',
+           'Ветер сегодня попутный. Напишите, позвоните, начните — обстоятельства за вас.'],
+       en:['Luck walks beside you at an even pace. Calm confidence today is worth more than haste.',
+           'A good day for quiet victories: whatever is done without fuss turns out best.',
+           'The wind is at your back today. Write, call, begin — circumstances are on your side.']},
+     cats:{
+       ru:['Сбудется, если не торопить события','Тёплые встречи и добрые знаки впереди','Ровный ход и приятные вести','Усердие принесёт свои плоды','Всё в порядке — берегите режим','Без потерь и с малыми радостями'],
+       en:['It will come true, if you do not rush events','Warm meetings and kind signs lie ahead','A steady pace and pleasant news','Diligence will bear its fruits','All is well — mind your routine','No losses, and small joys']}},
+    {kanji:'中吉', romaji:'CHUKICHI', t:{ru:'Средняя удача', en:'Middle Blessing'}, w:22, color:'#C29545',
+     poems:{
+       ru:['Хорошее складывается из маленьких шагов. Доверьтесь ритму дня и доведите начатое до конца.',
+           'Середина пути — тоже удача: начатое можно смело продолжать, а сомнения оставить на потом.',
+           'День располагает к порядку. Разложите дела по полочкам — и нужное найдётся само.'],
+       en:['Good things are built from small steps. Trust the rhythm of the day and finish what you began.',
+           'The middle of the road is luck too: what is begun can be boldly continued, and doubts left for later.',
+           'The day favours order. Sort your affairs into shelves — and the right one will find itself.']},
+     cats:{
+       ru:['Сбудется к концу сезона','Повод для улыбки уже близко','Появляется возможность для роста','Всё стабильно — повторите главное','Хорошо, но отдых не откладывайте','Умеренно: план — ваш лучший друг'],
+       en:['It will come true by the end of the season','A reason to smile is already near','A chance for growth appears','All is steady — review the essentials','Good, but do not put off your rest','Moderate: a plan is your best friend']}},
+    {kanji:'小吉', romaji:'SHOKICHI', t:{ru:'Небольшая удача', en:'Small Blessing'}, w:18, color:'#9C86B4',
+     poems:{
+       ru:['Небольшая удача учит ценить простое. Один тихий радостный день — уже подарок.',
+           'Счастье сегодня прячется в мелочах: тёплая чашка, доброе слово, лишняя минута тишины.',
+           'Медленный день — не плохой день. Один маленький шаг сейчас стоит трёх завтрашних.'],
+       en:['A small blessing teaches us to value simple things. One quiet, joyful day is already a gift.',
+           'Happiness today hides in little things: a warm cup, a kind word, an extra minute of silence.',
+           'A slow day is not a bad day. One small step now is worth three tomorrow.']},
+     cats:{
+       ru:['Сбудется через маленькую дверь','Тихая нежность уже рядом','Мелочи решат больше, чем кажется','Немного каждый день — и получится','Прислушайтесь к телу','Экономия обернётся удачей'],
+       en:['It will come true through a little door','Quiet tenderness is already near','Small things will decide more than they seem','A little every day — and it will work out','Listen to your body','Saving will turn into luck']}},
+    {kanji:'末吉', romaji:'SUEKICHI', t:{ru:'Не очень удача', en:'Future Blessing'}, w:18, color:'#8B8494',
+     poems:{
+       ru:['Всё наладится — но чуть позже. Сейчас аккуратность важнее скорости.',
+           'Терпение — ваш союзник: семя, посеянное сегодня, взойдёт в свой сезон.',
+           'Удача ещё в пути. Подготовьте ей место — и она придёт с подарками.'],
+       en:['Everything will get better — just a little later. Right now, care matters more than speed.',
+           'Patience is your ally: the seed sown today will sprout in its own season.',
+           'Luck is still on its way. Prepare a place for it — and it will arrive with gifts.']},
+     cats:{
+       ru:['Пока рано — но семя посеяно','Ещё не сейчас, и это к лучшему','Перемены случатся позже — копите силы','Результат придёт не сразу','Будьте внимательнее к себе','Не время для больших трат'],
+       en:['Not yet — but the seed is sown','Not now, and that is for the best','Changes will come later — gather strength','The result will not come at once','Be a little more attentive to yourself','Not the time for big spending']}},
+    {kanji:'凶', romaji:'KYO', t:{ru:'Плохая удача', en:'Misfortune'}, w:12, color:'#5C5566',
+     poems:{
+       ru:['Плохая удача — тоже указатель: она лишь просит идти осторожнее. Уступите сегодня — выиграете завтра.',
+           'День просит тишины и бережности. Пропустите суету мимо — и всё пройдёт мимо вас.',
+           'Не всякий шаг вперёд — движение. Сегодня сильнее тот, кто умеет подождать.'],
+       en:['Bad luck is a signpost too: it only asks you to walk carefully. Yield today — and you will win tomorrow.',
+           'The day asks for quiet and care. Let the bustle pass by — and everything will pass you by.',
+           'Not every step forward is progress. Today the stronger one is the one who can wait.']},
+     cats:{
+       ru:['Не сейчас: пересмотрите путь','Молчание сегодня мудрее слов','Обойдитесь без резких шагов','Вернитесь к основам','Поберегите себя особенно','Не для трат этот день'],
+       en:['Not now: rethink your path','Silence today is wiser than words','Do without sharp moves','Return to the basics','Take special care of yourself','Not a day for spending']}}
+  ];
+
+  var TIPS = {
+    ru:['Выпейте чай медленно, без телефона и новостей.','Напишите человеку, о котором давно вспоминали.','Пройдите одну лишнюю остановку пешком.','Отложите одну несрочную вещь на завтра — без вины.','Скажите «спасибо» тому, кто этого не ждёт.','Начните книгу, которую давно откладывали.','Лягте сегодня спать на полчаса раньше.','Заметьте одну красивую мелочь по дороге домой.','Сделайте паузу и посмотрите минуту в окно — просто так.','Переберите старые фотографии: найдётся одна, которая поднимет настроение.','Устройте пятиминутную уборку одной полки или ящика.','Послушайте одну песню, которая нравилась вам в школе.','Съешьте что-нибудь маленькое и очень вкусное — не торопясь.','Запишите мысль, которая не даёт покоя: бумага умеет хранить.','Проведите минуту с растением или питомцем — они это замечают.','Выберите любимую чашку и пейте из неё весь день.'],
+    en:['Sip your tea slowly, with no phone and no news.','Write to the person you have long meant to write to.','Get off one stop early and walk the rest.','Put off one non-urgent thing until tomorrow — guilt-free.','Say “thank you” to someone who does not expect it.','Start the book you have been putting off.','Go to bed half an hour earlier tonight.','Notice one beautiful little thing on your way home.','Take a pause and look out of the window for a minute — just because.','Go through old photographs: one of them will lift your spirits.','Do a five-minute tidy-up of a single shelf or drawer.','Listen to one song you loved back at school.','Eat something small and very tasty — slowly.','Write down the thought that keeps troubling you: paper knows how to hold it.','Spend a minute with a plant or a pet — they notice.','Pick your favourite cup and drink from it all day.']
+  };
+
+  /* ---------- язык ---------- */
+  var TITLES = {ru:'おみくじ — цифровое омикудзи', en:'おみくじ — Digital Omikuji'};
+  var lang = null;
+  try { lang = localStorage.getItem('omikuji-lang'); } catch (err) {}
+  if (lang !== 'ru' && lang !== 'en'){
+    var nav = (navigator.language || 'en').toLowerCase();
+    lang = nav.indexOf('ru') === 0 ? 'ru' : 'en';
+  }
+  app.dataset.lang = lang;
+  document.documentElement.lang = lang;
+  document.title = TITLES[lang];
+
+  var langBtns = document.querySelectorAll('.lang button');
+  function syncLang(){
+    langBtns.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.langset === lang ? 'true' : 'false'); });
+  }
+  langBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      if (b.dataset.langset === lang) return;
+      lang = b.dataset.langset;
+      app.dataset.lang = lang;
+      document.documentElement.lang = lang;
+      document.title = TITLES[lang];
+      syncLang();
+      if (curFortune && !viewPaper.hidden) renderPaper(curFortune, true);
+      try { localStorage.setItem('omikuji-lang', lang); } catch (err) {}
+    });
+  });
+  syncLang();
+
+  /* ---------- экраны ---------- */
+  var menuLinks = document.querySelectorAll('.menu a[data-nav]');
+  function showScreen(name){
+    viewHome.hidden = name !== 'home';
+    stage.hidden = name !== 'game';
+    menuLinks.forEach(function(a){ a.classList.toggle('active', a.dataset.nav === name); });
+    if (window.self === window.top) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('[data-nav]').forEach(function(el){
+    el.addEventListener('click', function(e){ e.preventDefault(); showScreen(el.dataset.nav); });
+  });
+
+  /* ---------- предсказание ---------- */
+  function pickFortune(){
+    var total = FORTUNES.reduce(function(s,f){ return s + f.w; }, 0);
+    for (var i = 0; i < 6; i++){
+      var r = Math.random() * total, pick = FORTUNES[0];
+      for (var j = 0; j < FORTUNES.length; j++){ r -= FORTUNES[j].w; if (r < 0){ pick = FORTUNES[j]; break; } }
+      if (!lastKanji || pick.kanji !== lastKanji){ lastKanji = pick.kanji; return pick; }
+    }
+    var f = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+    lastKanji = f.kanji; return f;
+  }
+
+  function renderPaper(f, keepNum){
+    if (!keepNum){
+      var n; do { n = 1 + Math.floor(Math.random() * 100); } while (n === lastNum);
+      lastNum = n;
+      if (reduced){ $('#fNum').textContent = n; } else { rollNumber(n); }
+    }
+    var fate = $('#fate');
+    fate.textContent = f.kanji;
+    fate.style.color = f.color;
+    $('#fT').textContent = f.t[lang];
+    $('#fSub').textContent = f.romaji + ' · ' + f.t[lang === 'ru' ? 'en' : 'ru'];
+    var poems = f.poems[lang];
+    $('#fPoem').textContent = poems[Math.floor(Math.random() * poems.length)];
+    $('#fCats').innerHTML = CATS.map(function(c, i){
+      return '<li><span class="cat-ic">' + ICONS[i] + '</span><div>' +
+        '<p class="cat-name"><span class="jp">' + c.jp + '</span>' + c.t[lang] + '</p>' +
+        '<p class="cat-v">' + f.cats[lang][i] + '</p></div></li>';
+    }).join('');
+    var pool = TIPS[lang], tip;
+    do { tip = pool[Math.floor(Math.random() * pool.length)]; } while (tip === lastTip && pool.length > 1);
+    lastTip = tip;
+    $('#fAdvice').textContent = tip;
+  }
+
+  function show(v){ v.hidden = false; v.classList.remove('show'); void v.offsetWidth; v.classList.add('show'); }
+  function hide(v){ v.hidden = true; v.classList.remove('show'); }
+
+  function rollNumber(finalN){
+    var el = $('#fNum'), steps = 8 + Math.floor(Math.random() * 5), i = 0;
+    var iv = setInterval(function(){
+      i++;
+      el.textContent = (i >= steps) ? finalN : 1 + Math.floor(Math.random() * 100);
+      if (i >= steps) clearInterval(iv);
+    }, 55);
+  }
+
+  function flyPetal(x0, y0, x1, y1, delay, size, dur){
+    var el = document.createElement('div');
+    el.className = 'fly';
+    el.style.setProperty('--x0', x0 + 'px');
+    el.style.setProperty('--y0', y0 + 'px');
+    el.style.setProperty('--dx', (x1 - x0) + 'px');
+    el.style.setProperty('--dy', (y1 - y0) + 'px');
+    el.style.setProperty('--dur', dur + 'ms');
+    el.innerHTML = '<div class="arc"><div class="spin"><svg viewBox="-9 -9 18 18" style="width:' +
+      size + 'px;height:auto"><use class="lf-sakura" href="#petalP"/><use class="lf-momiji" href="#momijiP"/></svg></div></div>';
+    app.appendChild(el);
+    setTimeout(function(){ el.remove(); }, delay + dur + 150);
+  }
+
+  function draw(){
+    if (busy) return;
+    busy = true;
+    drawBtn.disabled = true;
+    hide(viewPaper);
+    show(viewBox);
+    boxWrap.classList.remove('shake'); void boxWrap.offsetWidth; boxWrap.classList.add('shake');
+    var launchIn = reduced ? 300 : 470;
+    var revealIn = reduced ? 380 : 1230;
+    if (!reduced){
+      setTimeout(function(){
+        var b = boxWrap.getBoundingClientRect();
+        var sx = b.left + b.width / 2, sy = b.top + b.height * 0.22;
+        var ex = window.innerWidth / 2, ey = Math.max(140, window.innerHeight * 0.42);
+        flyPetal(sx, sy, ex, ey, 0, 24, 820);
+        flyPetal(sx - 10, sy + 6, ex - 48, ey + 34, 120, 14, 780);
+        flyPetal(sx + 12, sy - 4, ex + 54, ey + 18, 210, 12, 760);
+      }, launchIn);
+    }
+    setTimeout(function(){
+      curFortune = pickFortune();
+      renderPaper(curFortune);
+      hide(viewBox);
+      show(viewPaper);
+      drawBtn.disabled = false;
+      busy = false;
+      if (window.self === window.top) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, revealIn);
+  }
+
+  drawBtn.addEventListener('click', draw);
+  againBtn.addEventListener('click', draw);
+  boxWrap.addEventListener('click', draw);
+  boxWrap.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); draw(); }
+  });
+  backBtn.addEventListener('click', function(){ if (!busy){ hide(viewPaper); show(viewBox); } });
+
+  /* ---------- «О проекте» ---------- */
+  var dlg = document.getElementById('aboutDlg');
+  $('#aboutOpen').addEventListener('click', function(e){ e.preventDefault(); dlg.showModal(); });
+  $('#aboutClose').addEventListener('click', function(){ dlg.close(); });
+  dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
+
+  /* ---------- темы: гамма и свет/тьма ---------- */
+  var dots = document.querySelectorAll('.dot');
+  function syncDots(){
+    dots.forEach(function(d){ d.setAttribute('aria-pressed', d.dataset.set === app.dataset.palette ? 'true' : 'false'); });
+  }
+  dots.forEach(function(d){
+    d.addEventListener('click', function(){
+      app.dataset.palette = d.dataset.set;
+      syncDots();
+      try { localStorage.setItem('omikuji-palette', d.dataset.set); } catch (err) {}
+    });
+  });
+  themeBtn.addEventListener('click', function(){
+    var dark = app.classList.toggle('dark');
+    try { localStorage.setItem('omikuji-theme', dark ? 'dark' : 'light'); } catch (err) {}
+  });
+  try { if (localStorage.getItem('omikuji-theme') === 'dark') app.classList.add('dark'); } catch (err) {}
+  try {
+    var savedPalette = localStorage.getItem('omikuji-palette');
+    if (savedPalette === 'green' || savedPalette === 'blue' || savedPalette === 'red') app.dataset.palette = savedPalette;
+  } catch (err) {}
+  syncDots();
+
+  /* ---------- падающие лепестки и листья ---------- */
+  (function spawnPetals(){
+    var layer = document.getElementById('petalLayer');
+    function rnd(a, b){ return a + Math.random() * (b - a); }
+    for (var i = 0; i < 16; i++){
+      var el = document.createElement('div');
+      el.className = 'fall';
+      el.style.left = rnd(2, 97) + '%';
+      el.style.width = rnd(9, 17) + 'px';
+      el.style.animationDuration = rnd(11, 22) + 's';
+      el.style.animationDelay = '-' + rnd(0, 22) + 's';
+      el.style.opacity = rnd(0.35, 0.65).toFixed(2);
+      el.innerHTML = '<svg viewBox="-9 -9 18 18" style="animation-duration:' + rnd(2.6, 5) +
+        's;animation-delay:-' + rnd(0, 4) + 's"><use class="lf-sakura" href="#petalP"/><use class="lf-momiji" href="#momijiP"/></svg>';
+      layer.appendChild(el);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
