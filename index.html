@@ -163,8 +163,10 @@ main{position:relative;z-index:1;flex:1}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
 /* ---------- коробка ---------- */
+.box-row{position:relative}
 .box-wrap{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-.box-wrap svg{display:block;width:min(216px,58vw);height:auto}
+.box-wrap svg{display:block;width:min(216px,58vw);height:auto;transition:transform .25s ease}
+.box-wrap:hover svg{transform:translateY(-3px) rotate(-1deg)}
 .box-wrap.shake{animation:shake .68s ease-in-out}
 @keyframes shake{
   0%,100%{transform:translate(0,0) rotate(0)}
@@ -174,6 +176,21 @@ main{position:relative;z-index:1;flex:1}
   75%{transform:translate(1px,0) rotate(1deg)}
   90%{transform:translate(0,-2px) rotate(0)}
 }
+
+/* ---------- фурин — колокольчик ---------- */
+.hanger{position:absolute;top:50px;left:calc(50% + min(108px,29vw) - 43px);width:76px;height:190px;
+  border:none;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;z-index:2}
+.hanger svg{display:block;width:100%;height:100%;overflow:visible}
+.hanger .sway{transform-box:view-box;transform-origin:0px 0px;animation:hangersway 4.2s ease-in-out infinite alternate}
+@keyframes hangersway{from{transform:rotate(3deg)}to{transform:rotate(-3deg)}}
+.hanger:hover .sway{animation-duration:2s}
+.hanger .tanzaku{transform-box:fill-box;transform-origin:50% 0;animation:tanzaku 2.1s ease-in-out infinite alternate}
+@keyframes tanzaku{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+.hanger.pulling .sway{animation:ring .95s ease-in-out both}
+@keyframes ring{0%{transform:rotate(0)}22%{transform:rotate(14deg)}46%{transform:rotate(-9deg)}68%{transform:rotate(5deg)}86%{transform:rotate(-2deg)}100%{transform:rotate(0)}}
+.hanger .ring{opacity:0}
+.hanger.pulling .ring{animation:ringfade .9s ease both}
+@keyframes ringfade{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
 .box-front{fill:var(--oj-box-front)} .box-left{fill:var(--oj-box-left)} .box-right{fill:var(--oj-box-right)}
 .box-rim{fill:var(--oj-accent)} .box-hole{fill:var(--oj-accent-deep)}
 .box-label{fill:var(--oj-paper);stroke:var(--oj-line)}
@@ -223,6 +240,78 @@ main{position:relative;z-index:1;flex:1}
 .btn-again .jp{font-size:14.5px}
 .link-back{margin-top:14px;border:none;background:none;cursor:pointer;font:inherit;font-size:12.5px;color:var(--oj-muted);padding:4px 6px;transition:color .2s ease}
 .link-back:hover{color:var(--oj-accent)}
+
+/* ---------- анимации предсказания ---------- */
+.fly{position:fixed;left:0;top:0;z-index:60;pointer-events:none}
+.fly .arc{animation:flyArc var(--dur) cubic-bezier(.4,.1,.5,1) both}
+.fly .spin{animation:flySpin var(--dur) ease-in-out both}
+@keyframes flyArc{
+  0%{transform:translate(var(--x0),var(--y0))}
+  55%{transform:translate(calc(var(--x0) + var(--dx)*.52), calc(var(--y0) + var(--dy)*.26))}
+  100%{transform:translate(calc(var(--x0) + var(--dx)), calc(var(--y0) + var(--dy)))}
+}
+@keyframes flySpin{
+  0%{transform:rotate(0) scale(.55);opacity:0}
+  14%{opacity:1}
+  78%{opacity:1}
+  100%{transform:rotate(var(--r)) scale(1.1);opacity:0}
+}
+.veiled{position:relative;cursor:pointer;outline-offset:4px}
+.veiled .vbody{transition:filter .55s ease,opacity .55s ease;filter:blur(6px);opacity:.5}
+.veiled.open .vbody{filter:blur(0);opacity:1}
+.veil{position:absolute;inset:-4px 0;display:grid;place-items:center;color:var(--oj-accent);pointer-events:none;transition:opacity .4s ease,transform .4s ease}
+.veil svg{width:15px;height:15px;animation:veilpulse 1.7s ease-in-out infinite}
+@keyframes veilpulse{0%,100%{transform:scale(.9);opacity:.65}50%{transform:scale(1.2);opacity:1}}
+.veiled.open .veil{opacity:0;transform:scale(1.6)}
+.veiled.open{cursor:default}
+.view.show .paper{animation:unfold .55s ease both;transform-origin:50% 0}
+@keyframes unfold{
+  from{opacity:0;transform:perspective(900px) rotateX(-36deg) translateY(26px) scale(.96)}
+  to{opacity:1;transform:none}
+}
+.view.show .fate{animation:stamp .55s cubic-bezier(.2,1.5,.4,1) .3s both}
+@keyframes stamp{
+  from{opacity:0;transform:scale(1.9) rotate(-7deg)}
+  60%{opacity:1;transform:scale(.95) rotate(1.5deg)}
+  to{transform:scale(1) rotate(0)}
+}
+.view.show .fate-ru,.view.show .fate-en{animation:fadeUp .4s ease .38s both}
+.view.show .poem{animation:fadeUp .4s ease .3s both}
+.view.show .cats li{animation:fadeUp .38s ease both}
+.view.show .cats li:nth-child(1){animation-delay:.34s}
+.view.show .cats li:nth-child(2){animation-delay:.4s}
+.view.show .cats li:nth-child(3){animation-delay:.46s}
+.view.show .cats li:nth-child(4){animation-delay:.52s}
+.view.show .cats li:nth-child(5){animation-delay:.58s}
+.view.show .cats li:nth-child(6){animation-delay:.64s}
+.view.show .cat-ic{animation:catpop .45s cubic-bezier(.2,1.6,.4,1) both}
+.view.show .cats li:nth-child(1) .cat-ic{animation-delay:.34s}
+.view.show .cats li:nth-child(2) .cat-ic{animation-delay:.4s}
+.view.show .cats li:nth-child(3) .cat-ic{animation-delay:.46s}
+.view.show .cats li:nth-child(4) .cat-ic{animation-delay:.52s}
+.view.show .cats li:nth-child(5) .cat-ic{animation-delay:.58s}
+.view.show .cats li:nth-child(6) .cat-ic{animation-delay:.64s}
+@keyframes catpop{from{opacity:0;transform:scale(.4)}60%{transform:scale(1.15)}to{opacity:1;transform:scale(1)}}
+.view.show .advice-label,.view.show .advice{animation:fadeUp .4s ease .68s both}
+.view.show .btn-again,.view.show .link-back{animation:fadeUp .4s ease .78s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#viewBox.show .orn svg{transform-box:fill-box;transform-origin:center;animation:ornsway 3.5s ease-in-out .7s infinite alternate}
+@keyframes ornsway{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+.bstick{transform-box:fill-box;transform-origin:center;opacity:0}
+.box-wrap.shake .bstick{animation:stickpop .8s ease-out both}
+@keyframes stickpop{
+  0%{opacity:0;transform:translateY(10px) rotate(0)}
+  20%{opacity:1;transform:translateY(-22px) rotate(-16deg)}
+  45%{transform:translateY(-13px) rotate(12deg)}
+  70%{opacity:1;transform:translateY(-18px) rotate(-6deg)}
+  100%{opacity:0;transform:translateY(8px) rotate(0)}
+}
+.hero-box{transform-box:fill-box;transform-origin:center;animation:bob 5.5s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+dialog[open]{animation:dlgpop .32s cubic-bezier(.2,1.4,.4,1)}
+@keyframes dlgpop{from{opacity:0;transform:scale(.88) translateY(12px)}to{opacity:1;transform:none}}
+.levels .lv{transition:transform .18s ease}
+.levels .lv:hover{transform:translateY(-2px)}
 
 /* ---------- страница «Главная»: рассказ об омикудзи ---------- */
 .view-home{width:min(700px,100%);margin:0 auto;padding:24px 6px 26px}
@@ -277,10 +366,12 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
 @media (prefers-reduced-motion:reduce){
   .view.show,.box-wrap.shake,.fall,.fall svg,.fly,.fly .arc,.fly .spin,
   .view.show .paper,.view.show .fate,.view.show .fate-ru,.view.show .fate-en,
-  .view.show .poem,.view.show .cats li,.view.show .advice-label,.view.show .advice,
+  .view.show .poem,.view.show .cats li,.view.show .cat-ic,.view.show .advice-label,.view.show .advice,
   .view.show .btn-again,.view.show .link-back,.box-wrap.shake .bstick,.hero-box,
+  #viewBox.show .orn svg,.hanger .leaf,.hanger.pulling .leaf,.veil svg,
   dialog[open]{animation:none!important}
   .fly{display:none}
+  .veiled .vbody{transition:none}
 }
 </style>
 </head>
@@ -579,6 +670,7 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
 
     <div class="stage" id="stage" hidden>
       <section class="view" id="viewBox">
+        <div class="box-row">
         <div class="box-wrap" id="boxWrap" role="button" tabindex="0" aria-label="Достать предсказание из коробки / Draw a fortune from the box">
           <svg viewBox="0 0 220 246" aria-hidden="true">
             <ellipse class="box-ground" cx="110" cy="216" rx="76" ry="10"/>
@@ -592,11 +684,33 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
             <text class="box-char" x="110" y="142">み</text>
             <text class="box-char" x="110" y="168">く</text>
             <text class="box-char" x="110" y="194">じ</text>
-            <g class="bstick" aria-hidden="true">
+            <g class="bstick" aria-hidden="true" style="opacity:0">
               <rect x="105.5" y="8" width="9" height="46" rx="4.5" fill="#D9C795"/>
               <rect x="105.5" y="8" width="9" height="7" rx="3.5" fill="#C6B17C"/>
             </g>
           </svg>
+        </div>
+        <button class="hanger" id="hanger" type="button" aria-label="Позвонить в фурин / Ring the furin wind chime">
+          <svg viewBox="0 0 80 200" aria-hidden="true">
+            <g class="sway">
+              <line x1="0" y1="0" x2="38" y2="72" style="stroke:var(--oj-accent)" stroke-width="2"/>
+              <line x1="38" y1="72" x2="38" y2="88" style="stroke:var(--oj-accent)" stroke-width="2"/>
+              <path style="fill:var(--oj-petal)" d="M38 88 C 23 89, 17 108, 18.5 123 C 19.5 132, 27 137.5, 38 137.5 C 49 137.5, 56.5 132, 57.5 123 C 59 108, 53 89, 38 88 Z"/>
+              <ellipse cx="38" cy="135" rx="19" ry="3.4" style="fill:var(--oj-accent);opacity:.18"/>
+              <line x1="38" y1="90" x2="38" y2="130" style="stroke:var(--oj-accent)" stroke-width="1.4"/>
+              <circle cx="38" cy="132" r="3" style="fill:var(--oj-accent)"/>
+              <line x1="38" y1="132" x2="38" y2="142" style="stroke:var(--oj-accent)" stroke-width="1.2"/>
+              <g class="tanzaku">
+                <rect x="32.4" y="142" width="11.2" height="50" rx="2" style="fill:var(--oj-paper);stroke:var(--oj-line)" stroke-width="1"/>
+                <rect x="32.4" y="142" width="11.2" height="6" rx="2" style="fill:var(--oj-accent-soft)"/>
+              </g>
+              <g class="ring" fill="none" style="stroke:var(--oj-accent)" stroke-width="2" stroke-linecap="round">
+                <path d="M10 102 q-8 15 0 30"/>
+                <path d="M66 102 q8 15 0 30"/>
+              </g>
+            </g>
+          </svg>
+        </button>
         </div>
         <button class="btn-main" id="drawBtn" type="button">
           <span class="jp">おみくじを引く</span>
@@ -604,7 +718,10 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
           <span class="ru en-only">Get your fortune</span>
         </button>
         <div class="orn" aria-hidden="true"><svg viewBox="-8 -8 16 16"><use href="#bloom"/></svg></div>
-        <p class="hint"><span class="ru-only">Потяните за верёвочку, чтобы получить предсказание</span><span class="en-only">Give the string a little pull to receive your fortune</span></p>
+        <p class="hint">
+          <span class="ru-only">Позвоните в фурин — и получите предсказание</span>
+          <span class="en-only">Ring the little wind chime — and receive your fortune</span>
+        </p>
       </section>
 
       <section class="view" id="viewPaper" hidden>
@@ -615,11 +732,17 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
           <p class="fate-ru" id="fT">Великая удача</p>
           <p class="fate-en" id="fSub">DAIKICHI · GREAT BLESSING</p>
           <hr class="rule">
-          <p class="poem" id="fPoem"></p>
+          <div class="veiled" data-v="poem" tabindex="0" title="Нажмите, чтобы открыть / Tap to reveal">
+            <div class="vbody"><p class="poem" id="fPoem"></p></div>
+            <span class="veil" aria-hidden="true"><svg viewBox="-8 -8 16 16"><use href="#bloom"/></svg></span>
+          </div>
           <ul class="cats" id="fCats"></ul>
           <hr class="rule">
           <p class="advice-label"><span class="jp">今日の一言</span><span class="ru-only"> · совет дня</span><span class="en-only"> · today’s advice</span></p>
-          <p class="advice" id="fAdvice"></p>
+          <div class="veiled" data-v="advice" tabindex="0" title="Нажмите, чтобы открыть / Tap to reveal">
+            <div class="vbody"><p class="advice" id="fAdvice"></p></div>
+            <span class="veil" aria-hidden="true"><svg viewBox="-8 -8 16 16"><use href="#bloom"/></svg></span>
+          </div>
           <button class="btn-main btn-again" id="againBtn" type="button">
             <span class="jp">もう一度</span>
             <span class="ru ru-only">Получить ещё одно</span>
@@ -747,6 +870,7 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
   var boxWrap = $('#boxWrap'), drawBtn = $('#drawBtn');
   var themeBtn = $('#themeBtn'), againBtn = $('#againBtn'), backBtn = $('#backBtn');
   var busy = false, lastKanji = null, lastNum = null, lastTip = null, curFortune = null;
+  var revealed = new Set();
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var CATS = [
@@ -896,6 +1020,7 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
   }
 
   function renderPaper(f, keepNum){
+    if (!keepNum){ revealed.clear(); }
     if (!keepNum){
       var n; do { n = 1 + Math.floor(Math.random() * 100); } while (n === lastNum);
       lastNum = n;
@@ -909,14 +1034,22 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
     var poems = f.poems[lang];
     $('#fPoem').textContent = poems[Math.floor(Math.random() * poems.length)];
     $('#fCats').innerHTML = CATS.map(function(c, i){
-      return '<li><span class="cat-ic">' + ICONS[i] + '</span><div>' +
+      var v = 'cat' + i, open = reduced || revealed.has(v) ? ' open' : '';
+      var veil = reduced ? '' :
+        '<span class="veil" aria-hidden="true"><svg viewBox="-8 -8 16 16"><use href="#bloom"/></svg></span>';
+      var attrs = reduced ? '' : ' tabindex="0" title="Нажмите, чтобы открыть / Tap to reveal"';
+      return '<li class="' + (reduced ? '' : 'veiled') + open + '" data-v="' + v + '"' + attrs + '>' +
+        '<div class="vbody"><span class="cat-ic">' + ICONS[i] + '</span><div>' +
         '<p class="cat-name"><span class="jp">' + c.jp + '</span>' + c.t[lang] + '</p>' +
-        '<p class="cat-v">' + f.cats[lang][i] + '</p></div></li>';
+        '<p class="cat-v">' + f.cats[lang][i] + '</p></div></div>' + veil + '</li>';
     }).join('');
     var pool = TIPS[lang], tip;
     do { tip = pool[Math.floor(Math.random() * pool.length)]; } while (tip === lastTip && pool.length > 1);
     lastTip = tip;
     $('#fAdvice').textContent = tip;
+    document.querySelectorAll('#viewPaper .veiled').forEach(function(v){
+      v.classList.toggle('open', reduced || revealed.has(v.dataset.v));
+    });
   }
 
   function show(v){ v.hidden = false; v.classList.remove('show'); void v.offsetWidth; v.classList.add('show'); }
@@ -931,7 +1064,7 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
     }, 55);
   }
 
-  function flyPetal(x0, y0, x1, y1, delay, size, dur){
+  function flyPetal(x0, y0, x1, y1, delay, size, dur, spin){
     var el = document.createElement('div');
     el.className = 'fly';
     el.style.setProperty('--x0', x0 + 'px');
@@ -939,10 +1072,18 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
     el.style.setProperty('--dx', (x1 - x0) + 'px');
     el.style.setProperty('--dy', (y1 - y0) + 'px');
     el.style.setProperty('--dur', dur + 'ms');
+    el.style.setProperty('--r', spin);
     el.innerHTML = '<div class="arc"><div class="spin"><svg viewBox="-9 -9 18 18" style="width:' +
       size + 'px;height:auto"><use class="lf-sakura" href="#petalP"/><use class="lf-momiji" href="#momijiP"/></svg></div></div>';
     app.appendChild(el);
-    setTimeout(function(){ el.remove(); }, delay + dur + 150);
+    setTimeout(function(){ el.remove(); }, delay + dur + 200);
+  }
+
+  function veilTap(e){
+    var v = e.target.closest('.veiled');
+    if (!v || v.classList.contains('open')) return;
+    v.classList.add('open');
+    if (v.dataset.v) revealed.add(v.dataset.v);
   }
 
   function draw(){
@@ -952,16 +1093,19 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
     hide(viewPaper);
     show(viewBox);
     boxWrap.classList.remove('shake'); void boxWrap.offsetWidth; boxWrap.classList.add('shake');
-    var launchIn = reduced ? 300 : 470;
-    var revealIn = reduced ? 380 : 1230;
+    var launchIn = reduced ? 300 : 520;
+    var revealIn = reduced ? 380 : 1180;
     if (!reduced){
       setTimeout(function(){
-        var b = boxWrap.getBoundingClientRect();
-        var sx = b.left + b.width / 2, sy = b.top + b.height * 0.22;
-        var ex = window.innerWidth / 2, ey = Math.max(140, window.innerHeight * 0.42);
-        flyPetal(sx, sy, ex, ey, 0, 24, 820);
-        flyPetal(sx - 10, sy + 6, ex - 48, ey + 34, 120, 14, 780);
-        flyPetal(sx + 12, sy - 4, ex + 54, ey + 18, 210, 12, 760);
+        var hb = hanger.getBoundingClientRect();
+        var hx = hb.left + hb.width / 2, hy = hb.top + hb.height * 0.3;
+        var bb = boxWrap.getBoundingClientRect();
+        var bx = bb.left + bb.width / 2, by = bb.top + bb.height * 0.2;
+        var ex = window.innerWidth / 2, ey = Math.max(150, window.innerHeight * 0.4);
+        flyPetal(hx, hy, ex, ey, 0, 26, 950, '330deg');
+        flyPetal(bx - 8, by, ex - 52, ey + 30, 130, 17, 900, '-300deg');
+        flyPetal(bx + 10, by - 4, ex + 56, ey + 16, 260, 19, 880, '280deg');
+        flyPetal(bx, by + 6, ex + 8, ey + 52, 390, 14, 860, '-260deg');
       }, launchIn);
     }
     setTimeout(function(){
@@ -975,8 +1119,22 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
     }, revealIn);
   }
 
+  var hanger = document.getElementById('hanger');
+
+  function pullAndDraw(){
+    if (busy) return;
+    if (!reduced){
+      hanger.classList.remove('pulling'); void hanger.offsetWidth; hanger.classList.add('pulling');
+      setTimeout(function(){ hanger.classList.remove('pulling'); }, 1050);
+      setTimeout(draw, 180);
+    } else {
+      draw();
+    }
+  }
+
   drawBtn.addEventListener('click', draw);
   againBtn.addEventListener('click', draw);
+  hanger.addEventListener('click', pullAndDraw);
   boxWrap.addEventListener('click', draw);
   boxWrap.addEventListener('keydown', function(e){
     if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); draw(); }
@@ -988,6 +1146,15 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
   $('#aboutOpen').addEventListener('click', function(e){ e.preventDefault(); dlg.showModal(); });
   $('#aboutClose').addEventListener('click', function(){ dlg.close(); });
   dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
+
+  /* ---------- скрытые блоки предсказания ---------- */
+  var paperEl = document.querySelector('#viewPaper .paper');
+  paperEl.addEventListener('click', veilTap);
+  paperEl.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var v = e.target.closest('.veiled');
+    if (v){ e.preventDefault(); veilTap(e); }
+  });
 
   /* ---------- темы: гамма и свет/тьма ---------- */
   var dots = document.querySelectorAll('.dot');
@@ -1016,7 +1183,7 @@ footer{position:relative;z-index:1;text-align:center;padding:0 20px 20px;font-si
   (function spawnPetals(){
     var layer = document.getElementById('petalLayer');
     function rnd(a, b){ return a + Math.random() * (b - a); }
-    for (var i = 0; i < 16; i++){
+    for (var i = 0; i < 30; i++){
       var el = document.createElement('div');
       el.className = 'fall';
       el.style.left = rnd(2, 97) + '%';
